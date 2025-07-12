@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useEffect, useRef } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useEffect, useRef } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface NotificationMessage {
   msg: string;
@@ -13,41 +13,43 @@ export function useWebSocket() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    const token = localStorage.getItem('auth_token');
+    const token = localStorage.getItem("auth_token");
     if (!token) return;
 
-    const wsUrl = `${process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000'}/ws/notifications?token=${token}`;
-    
+    const wsUrl = `${
+      process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000"
+    }/ws/notifications?token=${token}`;
+
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 
     ws.onopen = () => {
-      console.log('WebSocket connected');
+      console.log("WebSocket connected");
     };
 
     ws.onmessage = (event) => {
       try {
         const data: NotificationMessage = JSON.parse(event.data);
-        console.log('Received notification:', data);
-        
+        console.log("Received notification:", data);
+
         // Update notifications cache
-        queryClient.invalidateQueries({ queryKey: ['notifications'] });
-        
+        queryClient.invalidateQueries({ queryKey: ["notifications"] });
+
         // Show browser notification if permission granted
-        if (Notification.permission === 'granted') {
-          new Notification('StackIt', {
+        if (Notification.permission === "granted") {
+          new Notification("StackIt", {
             body: data.msg,
-            icon: '/favicon.ico',
+            icon: "/favicon.ico",
           });
         }
       } catch (error) {
-        console.error('Failed to parse WebSocket message:', error);
+        console.error("Failed to parse WebSocket message:", error);
       }
     };
 
     ws.onclose = (event) => {
-      console.log('WebSocket disconnected:', event.code, event.reason);
-      
+      console.log("WebSocket disconnected:", event.code, event.reason);
+
       // Reconnect after a delay if not manually closed
       if (event.code !== 1000) {
         setTimeout(() => {
@@ -59,12 +61,12 @@ export function useWebSocket() {
     };
 
     ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
+      console.error("WebSocket error:", error);
     };
 
     return () => {
       if (wsRef.current) {
-        wsRef.current.close(1000, 'Component unmounted');
+        wsRef.current.close(1000, "Component unmounted");
         wsRef.current = null;
       }
     };
@@ -72,7 +74,7 @@ export function useWebSocket() {
 
   // Request notification permission on mount
   useEffect(() => {
-    if ('Notification' in window && Notification.permission === 'default') {
+    if ("Notification" in window && Notification.permission === "default") {
       Notification.requestPermission();
     }
   }, []);

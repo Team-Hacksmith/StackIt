@@ -5,7 +5,7 @@ export const useMe = () => {
   return useQuery({
     queryKey: ["me"],
     queryFn: () => authAPI.me(),
-    enabled: !!localStorage.getItem("auth_token"),
+    enabled: window !== undefined && !!localStorage.getItem("auth_token"),
     retry: false,
   });
 };

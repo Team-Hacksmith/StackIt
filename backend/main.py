@@ -1,8 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine, Base
-from app.routes import auth
+from app.routes import auth, posts, comments, tags
 from app.config import get_settings
+from app.models import relationships
 
 settings = get_settings()
 Base.metadata.create_all(bind=engine)
@@ -18,6 +19,9 @@ app.add_middleware(
 )
 
 app.include_router(auth.router, tags=["Auth"])
+app.include_router(posts.router, tags=["Posts"])
+app.include_router(comments.router, tags=["Comments"])
+app.include_router(tags.router, tags=["Tags"])
 
 
 @app.get("/")

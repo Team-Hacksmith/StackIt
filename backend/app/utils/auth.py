@@ -71,3 +71,12 @@ async def get_current_user(
     if user is None:
         raise credentials_exception
     return user
+
+
+async def is_admin(current_user: Annotated[User, Depends(get_current_user)]) -> bool:
+    if current_user.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only admins can perform this action",
+        )
+    return True

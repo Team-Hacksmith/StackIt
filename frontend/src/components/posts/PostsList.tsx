@@ -5,8 +5,9 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { usePosts } from '@/hooks/usePosts';
-import { MessageCircle, ThumbsUp, Clock } from 'lucide-react';
+import { MessageCircle, Clock } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { ArrowUp } from 'lucide-react';
 
 export function PostsList() {
   const { data: posts, isLoading, error } = usePosts();
@@ -73,7 +74,7 @@ export function PostsList() {
                 </div>
                 
                 <div className="flex items-center space-x-1">
-                  <ThumbsUp className="w-4 h-4" />
+                  <ArrowUp className="w-4 h-4" />
                   <span>0 votes</span>
                 </div>
                 

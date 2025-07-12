@@ -2,7 +2,7 @@
 ### StackIt – A Minimal Q&A Forum Platform
 
 # Team Name
-### Hacksmith
+### Team 3957
 
 # Team Email Address
 gupta.manish2304@gmail.com

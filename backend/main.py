@@ -1,7 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine, Base
-from app.routes import auth, posts, comments, tags, users
+
+from app.routes import auth, posts, comments, tags, users, notifications
+
 from app.config import get_settings
 from app.models import relationships
 
@@ -23,6 +25,7 @@ app.include_router(users.router, tags=["Users"])
 app.include_router(posts.router, tags=["Posts"])
 app.include_router(comments.router, tags=["Comments"])
 app.include_router(tags.router, tags=["Tags"])
+app.include_router(notifications.router, tags=["Notifications"])
 
 
 @app.get("/")

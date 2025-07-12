@@ -17,3 +17,7 @@ class User(Base):
 
     # Relationship to track who promoted this user to admin
     created_by = relationship("User", remote_side=[id], backref="created_admins")
+
+    notifications = relationship(
+        "Notification", back_populates="user", cascade="all, delete-orphan"
+    )

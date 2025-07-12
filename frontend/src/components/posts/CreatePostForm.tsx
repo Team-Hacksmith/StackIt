@@ -24,9 +24,7 @@ import { RichTextEditor } from "@/components/editor/RichTextEditor";
 const postSchema = z.object({
   title: z.string().min(10, "Title must be at least 10 characters"),
   body: z.string().min(20, "Body must be at least 20 characters"),
-  tags: z
-    .array(z.object({ id: z.number(), title: z.string() }))
-    .min(1, "At least one tag is required"),
+  tags: z.any(),
 });
 
 type PostFormData = z.infer<typeof postSchema>;
@@ -48,6 +46,8 @@ export function CreatePostForm() {
   });
 
   const onSubmit = async (data: PostFormData) => {
+    console.log(data);
+
     try {
       if (selectedTags.length === 0) {
         form.setError("tags", { message: "At least one tag is required" });
@@ -133,7 +133,7 @@ export function CreatePostForm() {
           </div>
           {form.formState.errors.tags && (
             <p className="text-sm font-medium text-destructive">
-              {form.formState.errors.tags.message}
+              {/* {form.formState.errors.tags.message} */}
             </p>
           )}
         </div>

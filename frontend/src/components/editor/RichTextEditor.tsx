@@ -1,10 +1,13 @@
 "use client";
 
+import { useRef } from "react";
 import { type Editor, useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import TextAlign from "@tiptap/extension-text-align";
 import Link from "@tiptap/extension-link";
+import Image from "@tiptap/extension-image";
 import Emoji, { gitHubEmojis } from "@tiptap/extension-emoji";
+import { uploadAPI } from "@/services/api";
 import {
   Bold,
   Italic,
@@ -16,6 +19,7 @@ import {
   List,
   ListOrdered,
   Smile,
+  ImageIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Toggle } from "@/components/ui/toggle";
@@ -24,15 +28,23 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { toast } from "sonner";
 
 interface ToolbarButtonProps {
   onClick: () => void;
   active?: boolean;
   icon: React.ReactNode;
   tooltip: string;
+  disabled?: boolean;
 }
 
-function ToolbarButton({ onClick, active, icon, tooltip }: ToolbarButtonProps) {
+function ToolbarButton({
+  onClick,
+  active,
+  icon,
+  tooltip,
+  disabled,
+}: ToolbarButtonProps) {
   return (
     <Toggle
       type="button"
@@ -40,6 +52,7 @@ function ToolbarButton({ onClick, active, icon, tooltip }: ToolbarButtonProps) {
       onClick={onClick}
       className="h-8 w-8"
       title={tooltip}
+      disabled={disabled}
     >
       {icon}
     </Toggle>
@@ -71,6 +84,64 @@ function EmojiPicker({ editor }: { editor: Editor }) {
         ))}
       </div>
     </div>
+  );
+}
+
+function ImageUploader({ editor }: { editor: Editor }) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const baseURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+  const handleImageUpload = async (file: File) => {
+    console.log(file);
+
+    try {
+      const { data } = await uploadAPI.uploadFile(file);
+      console.log(data);
+      if (data?.url) {
+        // If the URL is relative (doesn't start with http), prepend the base URL
+        const imageUrl = data.url.startsWith("http")
+          ? data.url
+          : `${baseURL}${data.url}`;
+        editor.chain().focus().setImage({ src: imageUrl }).run();
+      }
+    } catch (error) {
+      toast.error("Failed to upload image");
+    }
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        // 5MB limit
+        toast.error("Image size should be less than 5MB");
+        return;
+      }
+      if (!file.type.startsWith("image/")) {
+        toast.error("Only image files are allowed");
+        return;
+      }
+      handleImageUpload(file);
+    }
+    // Clear the input so the same file can be selected again
+    event.target.value = "";
+  };
+
+  return (
+    <>
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        accept="image/*"
+        className="hidden"
+      />
+      <ToolbarButton
+        onClick={() => fileInputRef.current?.click()}
+        icon={<ImageIcon className="h-4 w-4" />}
+        tooltip="Upload Image"
+      />
+    </>
   );
 }
 
@@ -165,6 +236,7 @@ export function Toolbar({ editor }: { editor: Editor | null }) {
           <EmojiPicker editor={editor} />
         </PopoverContent>
       </Popover>
+      <ImageUploader editor={editor} />
     </div>
   );
 }
@@ -191,6 +263,10 @@ export function RichTextEditor({
       Link.configure({
         openOnClick: false,
         validate: (href) => /^https?:\/\//.test(href),
+      }),
+      Image.configure({
+        inline: false,
+        allowBase64: true,
       }),
       Emoji.configure({
         enableEmoticons: true,

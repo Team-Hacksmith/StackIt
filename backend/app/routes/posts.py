@@ -17,7 +17,7 @@ router = APIRouter()
 
 @router.get("/posts", response_model=List[PostSchema])
 def list_posts(db: Annotated[Session, Depends(get_db)]):
-    posts = db.query(Post).all()
+    posts = db.query(Post).join(Post.user).all()
     return posts
 
 
@@ -61,7 +61,7 @@ async def create_post(
 
 @router.get("/posts/{id}", response_model=PostSchema)
 def get_post(id: int, db: Annotated[Session, Depends(get_db)]):
-    post = db.query(Post).filter(Post.id == id).first()
+    post = db.query(Post).join(Post.user).filter(Post.id == id).first()
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
     return post
@@ -146,4 +146,6 @@ def list_posts_by_tag(
     if not tag:
         raise HTTPException(status_code=404, detail="Tag not found")
 
-    return tag.posts
+    # Get posts with user data
+    posts = db.query(Post).join(Post.user).filter(Post.tags.contains(tag)).all()
+    return posts

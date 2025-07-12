@@ -19,7 +19,9 @@ router = APIRouter()
 
 @router.get("/posts/{post_id}/comments", response_model=List[CommentSchema])
 def list_comments(post_id: int, db: Annotated[Session, Depends(get_db)]):
-    comments = db.query(Comment).filter(Comment.post_id == post_id).all()
+    comments = (
+        db.query(Comment).join(Comment.user).filter(Comment.post_id == post_id).all()
+    )
     return comments
 
 

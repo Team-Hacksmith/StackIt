@@ -7,8 +7,7 @@ class Comment(Base):
     __tablename__ = "comments"
 
     id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, index=True)
-    desc = Column(String)
+    body = Column(String)
     score = Column(Integer, default=0)
     is_accepted = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())

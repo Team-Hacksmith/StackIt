@@ -49,7 +49,8 @@ def update_comment(
     db_comment = db.query(Comment).filter(Comment.id == comment_id).first()
     if not db_comment:
         raise HTTPException(status_code=404, detail="Comment not found")
-    if db_comment.user_id != current_user.id:
+    # Allow both comment owner and admins to update
+    if db_comment.user_id != current_user.id and current_user.role != "admin":
         raise HTTPException(
             status_code=403, detail="Not authorized to update this comment"
         )
@@ -69,7 +70,8 @@ def delete_comment(
     db_comment = db.query(Comment).filter(Comment.id == comment_id).first()
     if not db_comment:
         raise HTTPException(status_code=404, detail="Comment not found")
-    if db_comment.user_id != current_user.id:
+    # Allow both comment owner and admins to delete
+    if db_comment.user_id != current_user.id and current_user.role != "admin":
         raise HTTPException(
             status_code=403, detail="Not authorized to delete this comment"
         )
@@ -90,9 +92,10 @@ def accept_comment(
         raise HTTPException(status_code=404, detail="Comment not found")
 
     post = db.query(Post).filter(Post.id == db_comment.post_id).first()
-    if post.user_id != current_user.id:
+    # Allow both post owner and admins to accept comments
+    if post.user_id != current_user.id and current_user.role != "admin":
         raise HTTPException(
-            status_code=403, detail="Only the post owner can accept comments"
+            status_code=403, detail="Only the post owner or admins can accept comments"
         )
 
     db_comment.is_accepted = True

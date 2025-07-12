@@ -59,7 +59,8 @@ def update_post(
     db_post = db.query(Post).filter(Post.id == id).first()
     if not db_post:
         raise HTTPException(status_code=404, detail="Post not found")
-    if db_post.user_id != current_user.id:
+    # Allow both post owner and admins to update
+    if db_post.user_id != current_user.id and current_user.role != "admin":
         raise HTTPException(
             status_code=403, detail="Not authorized to update this post"
         )
@@ -91,7 +92,8 @@ def delete_post(
     db_post = db.query(Post).filter(Post.id == id).first()
     if not db_post:
         raise HTTPException(status_code=404, detail="Post not found")
-    if db_post.user_id != current_user.id:
+    # Allow both post owner and admins to delete
+    if db_post.user_id != current_user.id and current_user.role != "admin":
         raise HTTPException(
             status_code=403, detail="Not authorized to delete this post"
         )

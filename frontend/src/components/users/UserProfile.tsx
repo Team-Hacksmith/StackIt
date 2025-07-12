@@ -1,19 +1,23 @@
-'use client';
+"use client";
 
-import { useQuery } from '@tanstack/react-query';
-import { usersAPI } from '@/services/api';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { User, Mail, Calendar } from 'lucide-react';
+import { useQuery } from "@tanstack/react-query";
+import { usersAPI } from "@/services/api";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { User, Mail, Calendar } from "lucide-react";
 
 interface UserProfileProps {
   userId: number;
 }
 
 export function UserProfile({ userId }: UserProfileProps) {
-  const { data: user, isLoading, error } = useQuery({
-    queryKey: ['users', userId],
+  const {
+    data: user,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["users", userId],
     queryFn: () => usersAPI.getUser(userId),
     enabled: !!userId,
   });
@@ -47,29 +51,31 @@ export function UserProfile({ userId }: UserProfileProps) {
                 {userData.name.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
-            
+
             <div>
               <h1 className="text-2xl font-bold">{userData.name}</h1>
               <p className="text-gray-600">@{userData.username}</p>
               <div className="flex items-center space-x-4 mt-2">
                 <Badge variant="secondary">
-                  {userData.karma} reputation
+                  {userData.karma || 0} reputation
                 </Badge>
-                <Badge variant={userData.role === 'admin' ? 'default' : 'outline'}>
+                <Badge
+                  variant={userData.role === "admin" ? "default" : "outline"}
+                >
                   {userData.role}
                 </Badge>
               </div>
             </div>
           </div>
         </CardHeader>
-        
+
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex items-center space-x-2">
               <Mail className="w-4 h-4 text-gray-500" />
               <span className="text-sm">{userData.email}</span>
             </div>
-            
+
             <div className="flex items-center space-x-2">
               <User className="w-4 h-4 text-gray-500" />
               <span className="text-sm capitalize">{userData.role}</span>

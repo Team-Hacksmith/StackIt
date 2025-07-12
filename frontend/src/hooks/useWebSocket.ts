@@ -18,7 +18,7 @@ export function useWebSocket() {
 
     const wsUrl = `${
       process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000"
-    }/ws/notifications?token=${token}`;
+    }/notifications/ws?token=${token}`;
 
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
@@ -32,7 +32,13 @@ export function useWebSocket() {
         const data: NotificationMessage = JSON.parse(event.data);
         console.log("Received notification:", data);
 
-        // Update notifications cache
+        // Update notifications cache immediately
+        queryClient.setQueryData<{ unread_count: number }>(
+          ["notifications", "unread"],
+          (old) => ({ unread_count: data.unread_count })
+        );
+
+        // Also invalidate to ensure full sync
         queryClient.invalidateQueries({ queryKey: ["notifications"] });
 
         // Show browser notification if permission granted
@@ -54,7 +60,14 @@ export function useWebSocket() {
       if (event.code !== 1000) {
         setTimeout(() => {
           if (!wsRef.current || wsRef.current.readyState === WebSocket.CLOSED) {
-            // Reconnect logic would go here
+            const token = localStorage.getItem("auth_token");
+            if (token) {
+              const wsUrl = `${
+                process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000"
+              }/notifications/ws?token=${token}`;
+              const newWs = new WebSocket(wsUrl);
+              wsRef.current = newWs;
+            }
           }
         }, 5000);
       }

@@ -56,6 +56,13 @@ export function PostsList() {
       {posts.data.map((post) => (
         <Card key={post.id} className="hover:shadow-md transition-shadow">
           <CardHeader className="pb-3">
+            {post.user && (
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-700">
+                  @{post.user.username}
+                </span>
+              </div>
+            )}
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <Link href={`/posts/${post.id}`}>
@@ -105,19 +112,6 @@ export function PostsList() {
                         {tag.title}
                       </Badge>
                     ))}
-                  </div>
-                )}
-
-                {post.user && (
-                  <div className="flex items-center space-x-2">
-                    <Avatar className="w-6 h-6">
-                      <AvatarFallback className="text-xs">
-                        {post.user.name.charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="text-sm text-gray-700">
-                      {post.user.username}
-                    </span>
                   </div>
                 )}
               </div>

@@ -64,6 +64,8 @@ export const commentsAPI = {
   deleteComment: (id: number) => apiClient.delete(`/comments/${id}`),
 
   acceptComment: (id: number) => apiClient.post(`/comments/${id}/accept`),
+  voteComment: (commentId: number, voteType: "upvote" | "downvote") =>
+    apiClient.post<Comment>(`/comments/${commentId}/vote/${voteType}`),
 };
 
 export const tagsAPI = {
@@ -77,6 +79,12 @@ export const tagsAPI = {
     apiClient.put<Tag>(`/tags/${id}`, data),
 
   adminDeleteTag: (id: number) => apiClient.delete(`/tags/${id}`),
+  createTag: (data: CreateTagRequest) => apiClient.post<Tag>("/tags", data),
+
+  updateTag: (id: number, data: UpdateTagRequest) =>
+    apiClient.put<Tag>(`/tags/${id}`, data),
+
+  deleteTag: (id: number) => apiClient.delete(`/tags/${id}`),
 };
 
 export const notificationsAPI = {

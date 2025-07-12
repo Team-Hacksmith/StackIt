@@ -1,6 +1,6 @@
 export interface User {
   id: number;
-  role: 'guest' | 'user' | 'admin';
+  role: "guest" | "user" | "admin";
   name: string;
   email: string;
   username: string;
@@ -39,7 +39,7 @@ export interface Tag {
 export interface Notification {
   id: number;
   user_id: number;
-  msg: string;
+  message: string;
   is_read: boolean;
   created_at: string;
 }

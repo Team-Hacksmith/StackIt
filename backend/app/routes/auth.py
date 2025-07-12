@@ -29,17 +29,21 @@ def register(user: UserCreate, db: Annotated[Session, Depends(get_db)]):
     )
     if db_user:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email or username already registered",
+            status_code=400, detail="Email or username already registered"
         )
+
+    # Check if this is the first user
+    is_first_user = db.query(User).first() is None
 
     hashed_password = get_password_hash(user.password)
     db_user = User(
-        name=user.name,
         email=user.email,
         username=user.username,
+        name=user.name,
         hashed_password=hashed_password,
+        role="admin" if is_first_user else "user",  # First user becomes admin
     )
+
     db.add(db_user)
     db.commit()
     db.refresh(db_user)

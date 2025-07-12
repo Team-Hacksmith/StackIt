@@ -75,3 +75,45 @@ async def delete_user(
     user = await get_user_by_id(user_id, db)
     db.delete(user)
     db.commit()
+
+
+@router.post("/users/{user_id}/promote", response_model=UserSchema)
+async def promote_to_admin(
+    user_id: int,
+    current_user: Annotated[User, Depends(get_current_admin_user)],
+    db: Annotated[Session, Depends(get_db)],
+):
+    user = await get_user_by_id(user_id, db)
+
+    if user.role == "admin":
+        raise HTTPException(status_code=400, detail="User is already an admin")
+
+    if user.id == current_user.id:
+        raise HTTPException(status_code=400, detail="Cannot promote yourself")
+
+    user.role = "admin"
+    user.created_by_id = current_user.id
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+@router.post("/users/{user_id}/demote", response_model=UserSchema)
+async def demote_admin(
+    user_id: int,
+    current_user: Annotated[User, Depends(get_current_admin_user)],
+    db: Annotated[Session, Depends(get_db)],
+):
+    user = await get_user_by_id(user_id, db)
+
+    if user.role != "admin":
+        raise HTTPException(status_code=400, detail="User is not an admin")
+
+    if user.id == current_user.id:
+        raise HTTPException(status_code=400, detail="Cannot demote yourself")
+
+    user.role = "user"
+    user.created_by_id = None
+    db.commit()
+    db.refresh(user)
+    return user

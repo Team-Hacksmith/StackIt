@@ -10,7 +10,8 @@ export default function NewPostPage() {
     redirect("/");
   }
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 max-w-screen-lg mx-auto">
+      <h1 className="py-10 text-6xl font-bold">Ask a question</h1>
       <CreatePostForm />
     </div>
   );

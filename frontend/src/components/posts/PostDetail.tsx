@@ -11,14 +11,31 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Textarea } from "@/components/ui/textarea";
 import { MessageCircle, ThumbsUp, Check, Clock } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import parse, {
+  attributesToProps,
+  HTMLReactParserOptions,
+  Element,
+} from "html-react-parser";
+import DOMPurify from "dompurify";
+import { RichTextEditor } from "@/components/editor/RichTextEditor";
 import { useState } from "react";
-import parse from "html-react-parser";
 
 interface PostDetailProps {
   postId: number;
+}
+
+interface Comment {
+  id: number;
+  body: string;
+  is_accepted: boolean;
+  user?: {
+    id: number;
+    name: string;
+    username: string;
+    karma: number;
+  };
 }
 
 export function PostDetail({ postId }: PostDetailProps) {
@@ -27,18 +44,17 @@ export function PostDetail({ postId }: PostDetailProps) {
   const { data: currentUser } = useMe();
   const createComment = useCreateComment();
   const acceptComment = useAcceptComment();
-
-  const [commentBody, setCommentBody] = useState("");
+  const [commentContent, setCommentContent] = useState("");
 
   const handleSubmitComment = async () => {
-    if (!commentBody.trim()) return;
+    if (!commentContent.trim()) return;
 
     try {
       await createComment.mutateAsync({
         postId,
-        data: { body: commentBody },
+        data: { body: commentContent },
       });
-      setCommentBody("");
+      setCommentContent(""); // Clear the content after successful submission
     } catch (error) {
       console.error("Failed to create comment:", error);
     }
@@ -102,7 +118,24 @@ export function PostDetail({ postId }: PostDetailProps) {
           </div>
 
           <div className="prose dark:prose-invert max-w-none">
-            {parse(postData.body)}
+            {parse(DOMPurify.sanitize(postData.body), {
+              htmlparser2: {
+                lowerCaseTags: true,
+                lowerCaseAttributeNames: true,
+              },
+              trim: true,
+              replace: (domNode) => {
+                if (domNode instanceof Element && domNode.attribs) {
+                  // Remove any script or event handler attributes
+                  Object.keys(domNode.attribs).forEach((key) => {
+                    if (key.startsWith("on") || key === "src") {
+                      delete domNode.attribs[key];
+                    }
+                  });
+                  return;
+                }
+              },
+            } as HTMLReactParserOptions)}
           </div>
 
           {postData.tags && postData.tags.length > 0 && (
@@ -141,15 +174,14 @@ export function PostDetail({ postId }: PostDetailProps) {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <Textarea
-                placeholder="Write your answer here..."
-                value={commentBody}
-                onChange={(e) => setCommentBody(e.target.value)}
-                className="min-h-[120px]"
+              <RichTextEditor
+                content={commentContent}
+                onChange={setCommentContent}
+                minHeight="150px"
               />
               <Button
                 onClick={handleSubmitComment}
-                disabled={createComment.isPending || !commentBody.trim()}
+                disabled={createComment.isPending || !commentContent.trim()}
               >
                 {createComment.isPending ? "Posting..." : "Post Your Answer"}
               </Button>
@@ -166,79 +198,70 @@ export function PostDetail({ postId }: PostDetailProps) {
         </h3>
 
         {commentsLoading ? (
-          <div className="space-y-4">
-            {[...Array(3)].map((_, i) => (
-              <Card key={i} className="animate-pulse">
-                <CardContent className="p-6">
-                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="animate-pulse space-y-4">
+            <div className="h-32 bg-gray-200 rounded"></div>
+            <div className="h-32 bg-gray-200 rounded"></div>
           </div>
         ) : (
-          comments?.data?.map((comment) => (
-            <Card
-              key={comment.id}
-              className={
-                comment.is_accepted ? "border-green-500 bg-green-50" : ""
-              }
-            >
-              <CardContent className="p-6">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex items-center space-x-2">
-                    <div className="flex items-center space-x-1">
-                      <ThumbsUp className="w-4 h-4" />
-                      <span className="font-semibold">{comment.score}</span>
-                    </div>
-
-                    {comment.is_accepted && (
-                      <Badge variant="default" className="bg-green-600">
-                        <Check className="w-3 h-3 mr-1" />
-                        Accepted
-                      </Badge>
-                    )}
-                  </div>
-
-                  {isPostAuthor && !comment.is_accepted && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleAcceptComment(comment.id)}
-                      className="text-green-600 border-green-600 hover:bg-green-50"
-                    >
-                      <Check className="w-4 h-4 mr-1" />
-                      Accept
-                    </Button>
-                  )}
+          comments?.data?.map((comment: Comment) => (
+            <Card key={comment.id}>
+              <CardContent className="pt-6">
+                <div className="prose dark:prose-invert max-w-none">
+                  {parse(DOMPurify.sanitize(comment.body), {
+                    htmlparser2: {
+                      lowerCaseTags: true,
+                      lowerCaseAttributeNames: true,
+                    },
+                    trim: true,
+                    replace: (domNode) => {
+                      if (domNode instanceof Element && domNode.attribs) {
+                        // Remove any script or event handler attributes
+                        Object.keys(domNode.attribs).forEach((key) => {
+                          if (key.startsWith("on") || key === "src") {
+                            delete domNode.attribs[key];
+                          }
+                        });
+                        return;
+                      }
+                    },
+                  } as HTMLReactParserOptions)}
                 </div>
-
-                <div className="prose dark:prose-invert max-w-none mb-4">
-                  {parse(comment.body)}
-                </div>
-
                 {comment.user && (
-                  <div className="flex items-center justify-between pt-4 border-t">
+                  <div className="flex items-center justify-between mt-4 pt-4 border-t">
                     <div className="flex items-center space-x-2">
                       <Avatar className="w-6 h-6">
-                        <AvatarFallback className="text-xs">
+                        <AvatarFallback>
                           {comment.user.name.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <span className="font-medium text-sm">
+                        <div className="font-medium text-sm">
                           {comment.user.username}
-                        </span>
-                        <span className="text-xs text-gray-500 ml-2">
+                        </div>
+                        <div className="text-xs text-gray-500">
                           {comment.user.karma} reputation
-                        </span>
+                        </div>
                       </div>
                     </div>
-
-                    {comment.created_at && (
-                      <span className="text-xs text-gray-500">
-                        {formatDistanceToNow(new Date(comment.created_at))} ago
-                      </span>
+                    {isPostAuthor && !comment.is_accepted && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleAcceptComment(comment.id)}
+                        disabled={acceptComment.isPending}
+                      >
+                        <Check className="w-4 h-4 mr-1" />
+                        Accept Answer
+                      </Button>
+                    )}
+                    {comment.is_accepted && (
+                      <Badge
+                        variant="default"
+                        className="bg-green-600 text-white flex items-center"
+                      >
+                        <Check className="w-4 h-4 mr-1" />
+                        Accepted Answer
+                      </Badge>
                     )}
                   </div>
                 )}

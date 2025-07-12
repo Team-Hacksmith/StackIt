@@ -5,13 +5,15 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.user import User
 from app.schemas.auth import UserCreate, UserLogin, Token, User as UserSchema
+from app.config import get_settings
 from app.utils.auth import (
-    ACCESS_TOKEN_EXPIRE_MINUTES,
     authenticate_user,
     create_access_token,
     get_current_user,
     get_password_hash,
 )
+
+settings = get_settings()
 
 router = APIRouter()
 
@@ -53,7 +55,7 @@ def login(form_data: UserLogin, db: Annotated[Session, Depends(get_db)]):
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires
     )

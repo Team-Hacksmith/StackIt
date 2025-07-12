@@ -64,7 +64,6 @@ export const commentsAPI = {
   deleteComment: (id: number) => apiClient.delete(`/comments/${id}`),
 
   acceptComment: (id: number) => apiClient.post(`/comments/${id}/accept`),
-
   voteComment: (commentId: number, voteType: "upvote" | "downvote") =>
     apiClient.post<Comment>(`/comments/${commentId}/vote/${voteType}`),
 };
@@ -72,6 +71,14 @@ export const commentsAPI = {
 export const tagsAPI = {
   getTags: () => apiClient.get<Tag[]>("/tags"),
 
+  // Admin functions
+  adminCreateTag: (data: CreateTagRequest) =>
+    apiClient.post<Tag>("/tags", data),
+
+  adminUpdateTag: (id: number, data: UpdateTagRequest) =>
+    apiClient.put<Tag>(`/tags/${id}`, data),
+
+  adminDeleteTag: (id: number) => apiClient.delete(`/tags/${id}`),
   createTag: (data: CreateTagRequest) => apiClient.post<Tag>("/tags", data),
 
   updateTag: (id: number, data: UpdateTagRequest) =>

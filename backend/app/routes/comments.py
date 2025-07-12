@@ -13,6 +13,7 @@ from app.schemas.notification import NotificationCreate
 from app.services.notifications import notification_service
 from app.utils.auth import get_current_user
 from app.utils.mentions import get_mentioned_users
+from app.services.karma import karma_service
 
 router = APIRouter()
 
@@ -44,6 +45,9 @@ async def create_comment(
     db.add(db_comment)
     db.commit()
     db.refresh(db_comment)
+
+    # Award karma for creating a comment
+    await karma_service.award_comment_creation(db, current_user.id)
 
     # Notify post owner about the new comment
     if post.user_id != current_user.id:
@@ -152,6 +156,9 @@ async def toggle_accept_comment(
     db.commit()
     db.refresh(db_comment)
 
+    # Award karma for getting comment accepted
+    await karma_service.award_comment_accepted(db, db_comment.user_id)
+
     # Notify comment author that their comment was accepted
     notification = NotificationCreate(
         user_id=db_comment.user_id,
@@ -188,30 +195,42 @@ async def vote_comment(
         if existing_vote.vote_type == vote_type:
             # Remove vote if clicking the same button
             db.delete(existing_vote)
-            # Update score
+            # Update score and karma
             if vote_type == VoteType.UPVOTE:
                 comment.score -= 1
+                await karma_service.handle_comment_vote(db, comment.user_id, False)
             else:
                 comment.score += 1
+                await karma_service.handle_comment_vote(db, comment.user_id, True)
         else:
             # Change vote type if voting differently
             existing_vote.vote_type = vote_type
-            # Update score
+            # Update score and karma
             if vote_type == VoteType.UPVOTE:
                 comment.score += 2  # -1 -> +1 = +2
+                await karma_service.handle_comment_vote(db, comment.user_id, True)
+                await karma_service.handle_comment_vote(
+                    db, comment.user_id, True
+                )  # Double karma change for vote switch
             else:
                 comment.score -= 2  # +1 -> -1 = -2
+                await karma_service.handle_comment_vote(db, comment.user_id, False)
+                await karma_service.handle_comment_vote(
+                    db, comment.user_id, False
+                )  # Double karma change for vote switch
     else:
         # Create new vote
         vote = CommentVote(
             user_id=current_user.id, comment_id=comment_id, vote_type=vote_type
         )
         db.add(vote)
-        # Update score
+        # Update score and karma
         if vote_type == VoteType.UPVOTE:
             comment.score += 1
+            await karma_service.handle_comment_vote(db, comment.user_id, True)
         else:
             comment.score -= 1
+            await karma_service.handle_comment_vote(db, comment.user_id, False)
 
     db.commit()
     db.refresh(comment)

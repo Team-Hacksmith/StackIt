@@ -58,7 +58,7 @@ function ToolbarButton({ onClick, active, icon, tooltip }: ToolbarButtonProps) {
     <Toggle
       type="button"
       pressed={active}
-      onToggle={onClick}
+      onClick={onClick}
       className="h-8 w-8"
       title={tooltip}
     >

@@ -80,3 +80,19 @@ async def is_admin(current_user: Annotated[User, Depends(get_current_user)]) -> 
             detail="Only admins can perform this action",
         )
     return True
+
+
+async def get_user_from_token(token: str, db: Session) -> User | None:
+    try:
+        payload = jwt.decode(
+            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
+        )
+        username = payload.get("sub")
+        if username is None:
+            return None
+        token_data = TokenData(username=username)
+    except JWTError:
+        return None
+
+    user = db.query(User).filter(User.username == token_data.username).first()
+    return user

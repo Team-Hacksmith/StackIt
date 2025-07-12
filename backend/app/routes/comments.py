@@ -5,8 +5,12 @@ from app.database import get_db
 from app.models.comment import Comment
 from app.models.post import Post
 from app.models.user import User
+from app.models.notification import NotificationType
 from app.schemas.comment import CommentCreate, Comment as CommentSchema
+from app.schemas.notification import NotificationCreate
+from app.services.notifications import notification_service
 from app.utils.auth import get_current_user
+from app.utils.mentions import get_mentioned_users
 
 router = APIRouter()
 
@@ -22,7 +26,7 @@ def list_comments(post_id: int, db: Annotated[Session, Depends(get_db)]):
     response_model=CommentSchema,
     status_code=status.HTTP_201_CREATED,
 )
-def create_comment(
+async def create_comment(
     post_id: int,
     comment: CommentCreate,
     current_user: Annotated[User, Depends(get_current_user)],
@@ -36,6 +40,29 @@ def create_comment(
     db.add(db_comment)
     db.commit()
     db.refresh(db_comment)
+
+    # Notify post owner about the new comment
+    if post.user_id != current_user.id:
+        notification = NotificationCreate(
+            user_id=post.user_id,
+            message=f"@{current_user.username} commented on your post: {post.title}",
+            type=NotificationType.COMMENT,
+            reference_id=db_comment.id,
+        )
+        await notification_service.create_notification(db, notification)
+
+    # Handle @mentions
+    mentioned_users = get_mentioned_users(db, comment.body)
+    for user in mentioned_users:
+        if user.id != current_user.id:
+            notification = NotificationCreate(
+                user_id=user.id,
+                message=f"@{current_user.username} mentioned you in a comment",
+                type=NotificationType.MENTION,
+                reference_id=db_comment.id,
+            )
+            await notification_service.create_notification(db, notification)
+
     return db_comment
 
 
@@ -82,7 +109,7 @@ def delete_comment(
 
 
 @router.post("/comments/{comment_id}/accept", response_model=CommentSchema)
-def accept_comment(
+async def accept_comment(
     comment_id: int,
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[Session, Depends(get_db)],
@@ -98,7 +125,18 @@ def accept_comment(
             status_code=403, detail="Only the post owner or admins can accept comments"
         )
 
+    # Set comment as accepted
     db_comment.is_accepted = True
     db.commit()
     db.refresh(db_comment)
+
+    # Notify comment author that their comment was accepted
+    notification = NotificationCreate(
+        user_id=db_comment.user_id,
+        message=f"Your comment on '{post.title}' was accepted as the answer",
+        type=NotificationType.ANSWER,
+        reference_id=db_comment.id,
+    )
+    await notification_service.create_notification(db, notification)
+
     return db_comment

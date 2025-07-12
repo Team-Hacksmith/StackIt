@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, Enum
+from sqlalchemy.orm import relationship
 from app.database import Base
 
 
@@ -12,3 +13,7 @@ class User(Base):
     hashed_password = Column(String)
     role = Column(String, default="user")
     karma = Column(Integer, default=0)
+
+    notifications = relationship(
+        "Notification", back_populates="user", cascade="all, delete-orphan"
+    )

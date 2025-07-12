@@ -21,3 +21,4 @@ class User(Base):
     notifications = relationship(
         "Notification", back_populates="user", cascade="all, delete-orphan"
     )
+    comment_votes = relationship("CommentVote", back_populates="user")

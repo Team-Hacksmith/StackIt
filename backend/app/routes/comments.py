@@ -1,11 +1,13 @@
 from typing import Annotated, List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from app.database import get_db
 from app.models.comment import Comment
 from app.models.post import Post
 from app.models.user import User
 from app.models.notification import NotificationType
+from app.models.vote import CommentVote, VoteType
 from app.schemas.comment import CommentCreate, Comment as CommentSchema
 from app.schemas.notification import NotificationCreate
 from app.services.notifications import notification_service
@@ -140,3 +142,57 @@ async def accept_comment(
     await notification_service.create_notification(db, notification)
 
     return db_comment
+
+
+@router.post("/comments/{comment_id}/vote/{vote_type}", response_model=CommentSchema)
+async def vote_comment(
+    comment_id: int,
+    vote_type: VoteType,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
+):
+    comment = db.query(Comment).filter(Comment.id == comment_id).first()
+    if not comment:
+        raise HTTPException(status_code=404, detail="Comment not found")
+
+    # Check if user has already voted
+    existing_vote = (
+        db.query(CommentVote)
+        .filter(
+            CommentVote.comment_id == comment_id, CommentVote.user_id == current_user.id
+        )
+        .first()
+    )
+
+    if existing_vote:
+        if existing_vote.vote_type == vote_type:
+            # Remove vote if clicking the same button
+            db.delete(existing_vote)
+            # Update score
+            if vote_type == VoteType.UPVOTE:
+                comment.score -= 1
+            else:
+                comment.score += 1
+        else:
+            # Change vote type if voting differently
+            existing_vote.vote_type = vote_type
+            # Update score
+            if vote_type == VoteType.UPVOTE:
+                comment.score += 2  # -1 -> +1 = +2
+            else:
+                comment.score -= 2  # +1 -> -1 = -2
+    else:
+        # Create new vote
+        vote = CommentVote(
+            user_id=current_user.id, comment_id=comment_id, vote_type=vote_type
+        )
+        db.add(vote)
+        # Update score
+        if vote_type == VoteType.UPVOTE:
+            comment.score += 1
+        else:
+            comment.score -= 1
+
+    db.commit()
+    db.refresh(comment)
+    return comment

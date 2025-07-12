@@ -1,32 +1,25 @@
-import type { Metadata } from "next"
-import { Geist, Geist_Mono } from "next/font/google"
-import type { ReactNode } from "react"
-import "./globals.css"
-import { Providers } from "./providers"
+import type { Metadata } from "next";
+import type { ReactNode } from "react";
+import { Inter } from "next/font/google";
+import { Providers } from "../components/provider";
+import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"]
-})
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"]
-})
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Forum",
-  description: "Community discussion platform"
-}
+  title: "StackIt - File Management System",
+  description: "A modern file management and sharing platform",
+  icons: {
+    icon: "/file.svg",
+  },
+};
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <Providers>
-          {children}
-        </Providers>
+    <html lang="en" suppressHydrationWarning>
+      <body className={inter.className}>
+        <Providers>{children}</Providers>
       </body>
     </html>
-  )
+  );
 }

@@ -5,8 +5,12 @@ from app.database import get_db
 from app.models.post import Post
 from app.models.tag import Tag
 from app.models.user import User
+from app.models.notification import NotificationType
 from app.schemas.post import PostCreate, Post as PostSchema
+from app.schemas.notification import NotificationCreate
+from app.services.notifications import notification_service
 from app.utils.auth import get_current_user
+from app.utils.mentions import get_mentioned_users
 
 router = APIRouter()
 
@@ -18,7 +22,7 @@ def list_posts(db: Annotated[Session, Depends(get_db)]):
 
 
 @router.post("/posts", response_model=PostSchema, status_code=status.HTTP_201_CREATED)
-def create_post(
+async def create_post(
     post: PostCreate,
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[Session, Depends(get_db)],
@@ -38,6 +42,19 @@ def create_post(
     db.add(db_post)
     db.commit()
     db.refresh(db_post)
+
+    # Handle @mentions in post body
+    mentioned_users = get_mentioned_users(db, post.body)
+    for user in mentioned_users:
+        if user.id != current_user.id:
+            notification = NotificationCreate(
+                user_id=user.id,
+                message=f"@{current_user.username} mentioned you in the post: {post.title}",
+                type=NotificationType.MENTION,
+                reference_id=db_post.id,
+            )
+            await notification_service.create_notification(db, notification)
+
     return db_post
 
 
@@ -50,7 +67,7 @@ def get_post(id: int, db: Annotated[Session, Depends(get_db)]):
 
 
 @router.put("/posts/{id}", response_model=PostSchema)
-def update_post(
+async def update_post(
     id: int,
     post: PostCreate,
     current_user: Annotated[User, Depends(get_current_user)],
@@ -64,6 +81,9 @@ def update_post(
         raise HTTPException(
             status_code=403, detail="Not authorized to update this post"
         )
+
+    # Store old body for mention comparison
+    old_mentions = get_mentioned_users(db, db_post.body)
 
     # Update basic fields
     db_post.title = post.title
@@ -80,6 +100,19 @@ def update_post(
 
     db.commit()
     db.refresh(db_post)
+
+    # Handle new @mentions in updated post body
+    new_mentions = get_mentioned_users(db, post.body)
+    for user in new_mentions:
+        if user.id != current_user.id and user not in old_mentions:
+            notification = NotificationCreate(
+                user_id=user.id,
+                message=f"@{current_user.username} mentioned you in an updated post: {post.title}",
+                type=NotificationType.MENTION,
+                reference_id=db_post.id,
+            )
+            await notification_service.create_notification(db, notification)
+
     return db_post
 
 

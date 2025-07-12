@@ -1,12 +1,13 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { usePosts } from '@/hooks/usePosts';
-import { MessageCircle, ThumbsUp, Clock } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
+import Link from "next/link";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { usePosts } from "@/hooks/usePosts";
+import { MessageCircle, ThumbsUp, Clock } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+import parse from "html-react-parser";
 
 export function PostsList() {
   const { data: posts, isLoading, error } = usePosts();
@@ -37,8 +38,13 @@ export function PostsList() {
   if (!posts?.data?.length) {
     return (
       <div className="text-center py-8">
-        <p className="text-gray-500">No posts yet. Be the first to ask a question!</p>
-        <Link href="/posts/new" className="text-blue-600 hover:underline mt-2 inline-block">
+        <p className="text-gray-500">
+          No posts yet. Be the first to ask a question!
+        </p>
+        <Link
+          href="/posts/new"
+          className="text-blue-600 hover:underline mt-2 inline-block"
+        >
           Ask a question
         </Link>
       </div>
@@ -57,13 +63,13 @@ export function PostsList() {
                     {post.title}
                   </h3>
                 </Link>
-                <p className="text-gray-600 mt-1 line-clamp-2">
-                  {post.body.substring(0, 150)}...
-                </p>
+                <div className="text-gray-600 mt-1 line-clamp-2 prose-sm">
+                  {parse(post.body)}
+                </div>
               </div>
             </div>
           </CardHeader>
-          
+
           <CardContent className="pt-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4 text-sm text-gray-500">
@@ -71,16 +77,18 @@ export function PostsList() {
                   <MessageCircle className="w-4 h-4" />
                   <span>{post.comments?.length || 0} answers</span>
                 </div>
-                
+
                 <div className="flex items-center space-x-1">
                   <ThumbsUp className="w-4 h-4" />
                   <span>0 votes</span>
                 </div>
-                
+
                 {post.created_at && (
                   <div className="flex items-center space-x-1">
                     <Clock className="w-4 h-4" />
-                    <span>{formatDistanceToNow(new Date(post.created_at))} ago</span>
+                    <span>
+                      {formatDistanceToNow(new Date(post.created_at))} ago
+                    </span>
                   </div>
                 )}
               </div>
@@ -89,13 +97,17 @@ export function PostsList() {
                 {post.tags && post.tags.length > 0 && (
                   <div className="flex space-x-1">
                     {post.tags.slice(0, 3).map((tag) => (
-                      <Badge key={tag.id} variant="secondary" className="text-xs">
+                      <Badge
+                        key={tag.id}
+                        variant="secondary"
+                        className="text-xs"
+                      >
                         {tag.title}
                       </Badge>
                     ))}
                   </div>
                 )}
-                
+
                 {post.user && (
                   <div className="flex items-center space-x-2">
                     <Avatar className="w-6 h-6">
@@ -103,7 +115,9 @@ export function PostsList() {
                         {post.user.name.charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
-                    <span className="text-sm text-gray-700">{post.user.username}</span>
+                    <span className="text-sm text-gray-700">
+                      {post.user.username}
+                    </span>
                   </div>
                 )}
               </div>

@@ -90,6 +90,16 @@ export function PostDetail({ postId }: PostDetailProps) {
       {/* Post */}
       <Card>
         <CardHeader>
+          {postData.user && (
+            <div className="flex items-center space-x-2">
+              <div>
+                <div className="font-medium">@{postData.user.username}</div>
+                <div className="text-sm text-gray-500">
+                  {postData.user.karma || 0} reputation
+                </div>
+              </div>
+            </div>
+          )}
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <h1 className="text-2xl font-bold mb-2">{postData.title}</h1>
@@ -147,22 +157,6 @@ export function PostDetail({ postId }: PostDetailProps) {
               ))}
             </div>
           )}
-
-          {postData.user && (
-            <div className="flex items-center space-x-2 mt-4 pt-4 border-t">
-              <Avatar className="w-8 h-8">
-                <AvatarFallback>
-                  {postData.user.name.charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <div className="font-medium">{postData.user.username}</div>
-                <div className="text-sm text-gray-500">
-                  {postData.user.karma} reputation
-                </div>
-              </div>
-            </div>
-          )}
         </CardHeader>
       </Card>
 
@@ -205,41 +199,16 @@ export function PostDetail({ postId }: PostDetailProps) {
         ) : (
           comments?.data?.map((comment: Comment) => (
             <Card key={comment.id}>
-              <CardContent className="pt-6">
-                <div className="prose dark:prose-invert max-w-none">
-                  {parse(DOMPurify.sanitize(comment.body), {
-                    htmlparser2: {
-                      lowerCaseTags: true,
-                      lowerCaseAttributeNames: true,
-                    },
-                    trim: true,
-                    replace: (domNode) => {
-                      if (domNode instanceof Element && domNode.attribs) {
-                        // Remove any script or event handler attributes
-                        Object.keys(domNode.attribs).forEach((key) => {
-                          if (key.startsWith("on") || key === "src") {
-                            delete domNode.attribs[key];
-                          }
-                        });
-                        return;
-                      }
-                    },
-                  } as HTMLReactParserOptions)}
-                </div>
+              <CardHeader>
                 {comment.user && (
-                  <div className="flex items-center justify-between mt-4 pt-4 border-t">
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      <Avatar className="w-6 h-6">
-                        <AvatarFallback>
-                          {comment.user.name.charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
                       <div>
                         <div className="font-medium text-sm">
-                          {comment.user.username}
+                          @{comment.user.username}
                         </div>
                         <div className="text-xs text-gray-500">
-                          {comment.user.karma} reputation
+                          {comment.user.karma || 0} reputation
                         </div>
                       </div>
                     </div>
@@ -265,6 +234,28 @@ export function PostDetail({ postId }: PostDetailProps) {
                     )}
                   </div>
                 )}
+              </CardHeader>
+              <CardContent className="">
+                <div className="prose dark:prose-invert max-w-none">
+                  {parse(DOMPurify.sanitize(comment.body), {
+                    htmlparser2: {
+                      lowerCaseTags: true,
+                      lowerCaseAttributeNames: true,
+                    },
+                    trim: true,
+                    replace: (domNode) => {
+                      if (domNode instanceof Element && domNode.attribs) {
+                        // Remove any script or event handler attributes
+                        Object.keys(domNode.attribs).forEach((key) => {
+                          if (key.startsWith("on") || key === "src") {
+                            delete domNode.attribs[key];
+                          }
+                        });
+                        return;
+                      }
+                    },
+                  } as HTMLReactParserOptions)}
+                </div>
               </CardContent>
             </Card>
           ))

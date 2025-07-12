@@ -64,7 +64,7 @@ export function useWebSocket() {
             if (token) {
               const wsUrl = `${
                 process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000"
-              }/ws/notifications?token=${token}`;
+              }/notifications/ws?token=${token}`;
               const newWs = new WebSocket(wsUrl);
               wsRef.current = newWs;
             }

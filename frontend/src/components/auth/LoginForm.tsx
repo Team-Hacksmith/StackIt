@@ -3,7 +3,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useLogin } from "@/hooks/useLogin";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -21,6 +20,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useLogin } from "@/hooks/useAuth";
 
 const formSchema = z.object({
   username: z.string().min(1, "Username is required"),
@@ -38,10 +38,10 @@ export function LoginForm() {
     },
   });
 
-  const login = useLogin();
+  const loginMutation = useLogin();
 
   async function onSubmit(values: LoginFormValues) {
-    await login.mutateAsync(values);
+    await loginMutation.mutateAsync(values);
   }
 
   return (
@@ -85,8 +85,12 @@ export function LoginForm() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" disabled={login.isPending}>
-              {login.isPending ? "Logging in..." : "Login"}
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={loginMutation.isPending}
+            >
+              {loginMutation.isPending ? "Logging in..." : "Login"}
             </Button>
           </form>
         </Form>

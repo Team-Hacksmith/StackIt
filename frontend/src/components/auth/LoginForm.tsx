@@ -85,11 +85,7 @@ export function LoginForm() {
                 </FormItem>
               )}
             />
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={login.isPending}
-            >
+            <Button type="submit" className="w-full" disabled={login.isPending}>
               {login.isPending ? "Logging in..." : "Login"}
             </Button>
           </form>

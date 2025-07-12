@@ -1,14 +1,14 @@
-"use client"
+"use client";
 
-import { LoginForm } from "@/components/auth/LoginForm"
-import { useMe } from "@/hooks/useMe"
-import { redirect } from "next/navigation"
+import { LoginForm } from "@/components/auth/LoginForm";
+import { useMe } from "@/hooks/useMe";
+import { redirect } from "next/navigation";
 
 export default function LoginPage() {
-  const { data: user, isLoading } = useMe()
+  const { data: user, isLoading } = useMe();
 
   if (!isLoading && user) {
-    redirect("/")
+    redirect("/");
   }
 
   return (
@@ -17,5 +17,5 @@ export default function LoginPage() {
         <LoginForm />
       </div>
     </div>
-  )
+  );
 }

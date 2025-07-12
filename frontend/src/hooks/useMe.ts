@@ -1,12 +1,11 @@
-import { useQuery } from "@tanstack/react-query"
-import axios from "@/lib/axios"
+import { useQuery } from "@tanstack/react-query";
+import { authAPI } from "@/services/api";
 
-export function useMe() {
+export const useMe = () => {
   return useQuery({
     queryKey: ["me"],
-    queryFn: async () => {
-      const { data } = await axios.get("/me")
-      return data
-    },
-  })
-}
+    queryFn: () => authAPI.me(),
+    enabled: !!localStorage.getItem("auth_token"),
+    retry: false,
+  });
+};

@@ -1,10 +1,10 @@
-import type { Metadata } from "next"
-import type { ReactNode } from "react"
-import { Inter } from "next/font/google"
-import { Providers } from "../components/provider"
-import "./globals.css"
+import type { Metadata } from "next";
+import type { ReactNode } from "react";
+import { Inter } from "next/font/google";
+import { Providers } from "../components/provider";
+import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "StackIt - File Management System",
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   icons: {
     icon: "/file.svg",
   },
-}
+};
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
@@ -21,5 +21,5 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <Providers>{children}</Providers>
       </body>
     </html>
-  )
+  );
 }

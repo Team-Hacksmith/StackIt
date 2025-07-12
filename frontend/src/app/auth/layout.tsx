@@ -18,10 +18,10 @@ export default function AuthLayout({
         <div className="absolute inset-0 bg-zinc-900" />
         <div className="relative z-20 flex items-center text-lg font-medium">
           <Link href="/" className="flex items-center space-x-2">
-            <Image 
-              src="/file.svg" 
-              alt="StackIt Logo" 
-              width={32} 
+            <Image
+              src="/file.svg"
+              alt="StackIt Logo"
+              width={32}
               height={32}
               className="w-8 h-8"
             />
@@ -31,7 +31,8 @@ export default function AuthLayout({
         <div className="relative z-20 mt-auto">
           <blockquote className="space-y-2">
             <p className="text-lg">
-              &ldquo;StackIt has completely transformed how we manage and share our files within the team.&rdquo;
+              &ldquo;StackIt has completely transformed how we manage and share
+              our files within the team.&rdquo;
             </p>
             <footer className="text-sm">Sofia Davis</footer>
           </blockquote>

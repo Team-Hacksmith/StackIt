@@ -111,7 +111,7 @@ def delete_comment(
 
 
 @router.post("/comments/{comment_id}/accept", response_model=CommentSchema)
-async def accept_comment(
+async def toggle_accept_comment(
     comment_id: int,
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[Session, Depends(get_db)],
@@ -121,10 +121,28 @@ async def accept_comment(
         raise HTTPException(status_code=404, detail="Comment not found")
 
     post = db.query(Post).filter(Post.id == db_comment.post_id).first()
-    # Allow both post owner and admins to accept comments
+    # Allow both post owner and admins to accept/unaccept comments
     if post.user_id != current_user.id and current_user.role != "admin":
         raise HTTPException(
             status_code=403, detail="Only the post owner or admins can accept comments"
+        )
+
+    if db_comment.is_accepted:
+        # If comment is already accepted, unaccept it
+        db_comment.is_accepted = False
+        db.commit()
+        db.refresh(db_comment)
+        return db_comment
+
+    # Check if any other comment is already accepted for this post
+    existing_accepted = (
+        db.query(Comment)
+        .filter(Comment.post_id == post.id, Comment.is_accepted == True)
+        .first()
+    )
+    if existing_accepted:
+        raise HTTPException(
+            status_code=400, detail="Another comment is already accepted for this post"
         )
 
     # Set comment as accepted

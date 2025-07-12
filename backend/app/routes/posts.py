@@ -27,29 +27,30 @@ async def create_post(
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[Session, Depends(get_db)],
 ):
+    if not post.tag_ids:
+        raise HTTPException(status_code=400, detail="At least one tag is required")
+
+    tags = db.query(Tag).filter(Tag.id.in_(post.tag_ids)).all()
+    if len(tags) != len(post.tag_ids):
+        raise HTTPException(status_code=400, detail="One or more tag IDs are invalid")
+    if len(tags) == 0:
+        raise HTTPException(status_code=400, detail="At least one tag is required")
+
     # Create the post
     db_post = Post(title=post.title, body=post.body, user_id=current_user.id)
-
-    # Handle tags if provided
-    if post.tag_ids:
-        tags = db.query(Tag).filter(Tag.id.in_(post.tag_ids)).all()
-        if len(tags) != len(post.tag_ids):
-            raise HTTPException(
-                status_code=400, detail="One or more tag IDs are invalid"
-            )
-        db_post.tags = tags
+    db_post.tags = tags
 
     db.add(db_post)
     db.commit()
     db.refresh(db_post)
 
-    # Handle @mentions in post body
+    # Handle @mentions in the post
     mentioned_users = get_mentioned_users(db, post.body)
     for user in mentioned_users:
         if user.id != current_user.id:
             notification = NotificationCreate(
                 user_id=user.id,
-                message=f"@{current_user.username} mentioned you in the post: {post.title}",
+                message=f"@{current_user.username} mentioned you in a post",
                 type=NotificationType.MENTION,
                 reference_id=db_post.id,
             )
@@ -89,14 +90,14 @@ async def update_post(
     db_post.title = post.title
     db_post.body = post.body
 
-    # Update tags if provided
-    if post.tag_ids is not None:
-        tags = db.query(Tag).filter(Tag.id.in_(post.tag_ids)).all()
-        if len(tags) != len(post.tag_ids):
-            raise HTTPException(
-                status_code=400, detail="One or more tag IDs are invalid"
-            )
-        db_post.tags = tags
+    # Validate and update tags
+    if not post.tag_ids:
+        raise HTTPException(status_code=400, detail="At least one tag is required")
+
+    tags = db.query(Tag).filter(Tag.id.in_(post.tag_ids)).all()
+    if len(tags) != len(post.tag_ids):
+        raise HTTPException(status_code=400, detail="One or more tag IDs are invalid")
+    db_post.tags = tags
 
     db.commit()
     db.refresh(db_post)

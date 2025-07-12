@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from app.schemas.user import UserPublic
 
 
 class CommentBase(BaseModel):
@@ -15,6 +16,7 @@ class Comment(CommentBase):
     post_id: int
     score: int
     is_accepted: bool
+    user: UserPublic
 
     class Config:
         from_attributes = True

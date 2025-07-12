@@ -32,3 +32,13 @@ class UserList(BaseModel):
     items: List[User]
     page: int
     size: int
+
+
+class UserPublic(BaseModel):
+    id: int
+    name: str
+    username: str
+    role: str
+
+    class Config:
+        from_attributes = True

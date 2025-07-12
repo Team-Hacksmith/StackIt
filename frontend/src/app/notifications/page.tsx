@@ -1,6 +1,9 @@
 "use client";
 
-import { useNotifications, useMarkAllNotificationsAsRead } from "@/hooks/useNotifications";
+import {
+  useNotifications,
+  useMarkAllNotificationsAsRead,
+} from "@/hooks/useNotifications";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
@@ -26,7 +29,7 @@ export default function NotificationsPage() {
     );
   }
 
-  const hasUnread = notifications?.data?.some(n => !n.is_read);
+  const hasUnread = notifications?.data?.some((n) => !n.is_read);
 
   return (
     <div className="max-w-3xl mx-auto p-6 space-y-6">
@@ -53,12 +56,14 @@ export default function NotificationsPage() {
           {notifications?.data?.map((notification) => (
             <Card
               key={notification.id}
-              className={`p-4 ${
-                !notification.is_read ? "bg-blue-50" : ""
-              }`}
+              className={`p-4 ${!notification.is_read ? "bg-blue-50" : ""}`}
             >
               <div className="flex flex-col space-y-2">
-                <p className={`${!notification.is_read ? "font-medium" : "text-gray-600"}`}>
+                <p
+                  className={`${
+                    !notification.is_read ? "font-medium" : "text-gray-600"
+                  }`}
+                >
                   {notification.message}
                 </p>
                 {notification.created_at && (

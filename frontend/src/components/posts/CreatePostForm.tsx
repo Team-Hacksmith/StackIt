@@ -44,6 +44,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Toggle } from "../ui/toggle";
 
 interface ToolbarButtonProps {
   onClick: () => void;
@@ -54,16 +55,15 @@ interface ToolbarButtonProps {
 
 function ToolbarButton({ onClick, active, icon, tooltip }: ToolbarButtonProps) {
   return (
-    <Button
+    <Toggle
       type="button"
-      variant={active ? "secondary" : "ghost"}
-      size="icon"
-      onClick={onClick}
+      pressed={active}
+      onToggle={onClick}
       className="h-8 w-8"
       title={tooltip}
     >
       {icon}
-    </Button>
+    </Toggle>
   );
 }
 

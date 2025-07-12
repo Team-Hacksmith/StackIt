@@ -11,6 +11,7 @@ from app.schemas.notification import NotificationCreate
 from app.services.notifications import notification_service
 from app.utils.auth import get_current_user
 from app.utils.mentions import get_mentioned_users
+from app.services.karma import karma_service
 
 router = APIRouter()
 
@@ -43,6 +44,9 @@ async def create_post(
     db.add(db_post)
     db.commit()
     db.refresh(db_post)
+
+    # Award karma for creating a post
+    await karma_service.award_post_creation(db, current_user.id)
 
     # Handle @mentions in the post
     mentioned_users = get_mentioned_users(db, post.body)

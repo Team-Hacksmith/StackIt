@@ -1,16 +1,21 @@
-'use client';
+"use client";
 
-import { usePost } from '@/hooks/usePosts';
-import { useComments, useCreateComment, useAcceptComment } from '@/hooks/useComments';
-import { useMe } from '@/hooks/useMe';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Textarea } from '@/components/ui/textarea';
-import { MessageCircle, ThumbsUp, Check, Clock } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
-import { useState } from 'react';
+import { usePost } from "@/hooks/usePosts";
+import {
+  useComments,
+  useCreateComment,
+  useAcceptComment,
+} from "@/hooks/useComments";
+import { useMe } from "@/hooks/useMe";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Textarea } from "@/components/ui/textarea";
+import { MessageCircle, ThumbsUp, Check, Clock } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+import { useState } from "react";
+import parse from "html-react-parser";
 
 interface PostDetailProps {
   postId: number;
@@ -22,20 +27,20 @@ export function PostDetail({ postId }: PostDetailProps) {
   const { data: currentUser } = useMe();
   const createComment = useCreateComment();
   const acceptComment = useAcceptComment();
-  
-  const [commentBody, setCommentBody] = useState('');
+
+  const [commentBody, setCommentBody] = useState("");
 
   const handleSubmitComment = async () => {
     if (!commentBody.trim()) return;
-    
+
     try {
       await createComment.mutateAsync({
         postId,
-        data: { body: commentBody }
+        data: { body: commentBody },
       });
-      setCommentBody('');
+      setCommentBody("");
     } catch (error) {
-      console.error('Failed to create comment:', error);
+      console.error("Failed to create comment:", error);
     }
   };
 
@@ -43,7 +48,7 @@ export function PostDetail({ postId }: PostDetailProps) {
     try {
       await acceptComment.mutateAsync(commentId);
     } catch (error) {
-      console.error('Failed to accept comment:', error);
+      console.error("Failed to accept comment:", error);
     }
   };
 
@@ -77,26 +82,29 @@ export function PostDetail({ postId }: PostDetailProps) {
                   <MessageCircle className="w-4 h-4" />
                   <span>{comments?.data?.length || 0} answers</span>
                 </div>
-                
+
                 <div className="flex items-center space-x-1">
                   <ThumbsUp className="w-4 h-4" />
                   <span>0 votes</span>
                 </div>
-                
+
                 {postData.created_at && (
                   <div className="flex items-center space-x-1">
                     <Clock className="w-4 h-4" />
-                    <span>Asked {formatDistanceToNow(new Date(postData.created_at))} ago</span>
+                    <span>
+                      Asked {formatDistanceToNow(new Date(postData.created_at))}{" "}
+                      ago
+                    </span>
                   </div>
                 )}
               </div>
             </div>
           </div>
-          
-          <div className="prose max-w-none">
-            <p className="whitespace-pre-wrap">{postData.body}</p>
+
+          <div className="prose dark:prose-invert max-w-none">
+            {parse(postData.body)}
           </div>
-          
+
           {postData.tags && postData.tags.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-4">
               {postData.tags.map((tag) => (
@@ -106,7 +114,7 @@ export function PostDetail({ postId }: PostDetailProps) {
               ))}
             </div>
           )}
-          
+
           {postData.user && (
             <div className="flex items-center space-x-2 mt-4 pt-4 border-t">
               <Avatar className="w-8 h-8">
@@ -139,11 +147,11 @@ export function PostDetail({ postId }: PostDetailProps) {
                 onChange={(e) => setCommentBody(e.target.value)}
                 className="min-h-[120px]"
               />
-              <Button 
+              <Button
                 onClick={handleSubmitComment}
                 disabled={createComment.isPending || !commentBody.trim()}
               >
-                {createComment.isPending ? 'Posting...' : 'Post Your Answer'}
+                {createComment.isPending ? "Posting..." : "Post Your Answer"}
               </Button>
             </div>
           </CardContent>
@@ -153,9 +161,10 @@ export function PostDetail({ postId }: PostDetailProps) {
       {/* Comments/Answers */}
       <div className="space-y-4">
         <h3 className="text-xl font-semibold">
-          {comments?.data?.length || 0} Answer{comments?.data?.length !== 1 ? 's' : ''}
+          {comments?.data?.length || 0} Answer
+          {comments?.data?.length !== 1 ? "s" : ""}
         </h3>
-        
+
         {commentsLoading ? (
           <div className="space-y-4">
             {[...Array(3)].map((_, i) => (
@@ -169,7 +178,12 @@ export function PostDetail({ postId }: PostDetailProps) {
           </div>
         ) : (
           comments?.data?.map((comment) => (
-            <Card key={comment.id} className={comment.is_accepted ? 'border-green-500 bg-green-50' : ''}>
+            <Card
+              key={comment.id}
+              className={
+                comment.is_accepted ? "border-green-500 bg-green-50" : ""
+              }
+            >
               <CardContent className="p-6">
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex items-center space-x-2">
@@ -177,7 +191,7 @@ export function PostDetail({ postId }: PostDetailProps) {
                       <ThumbsUp className="w-4 h-4" />
                       <span className="font-semibold">{comment.score}</span>
                     </div>
-                    
+
                     {comment.is_accepted && (
                       <Badge variant="default" className="bg-green-600">
                         <Check className="w-3 h-3 mr-1" />
@@ -185,7 +199,7 @@ export function PostDetail({ postId }: PostDetailProps) {
                       </Badge>
                     )}
                   </div>
-                  
+
                   {isPostAuthor && !comment.is_accepted && (
                     <Button
                       size="sm"
@@ -198,11 +212,11 @@ export function PostDetail({ postId }: PostDetailProps) {
                     </Button>
                   )}
                 </div>
-                
-                <div className="prose max-w-none mb-4">
-                  <p className="whitespace-pre-wrap">{comment.body}</p>
+
+                <div className="prose dark:prose-invert max-w-none mb-4">
+                  {parse(comment.body)}
                 </div>
-                
+
                 {comment.user && (
                   <div className="flex items-center justify-between pt-4 border-t">
                     <div className="flex items-center space-x-2">
@@ -212,13 +226,15 @@ export function PostDetail({ postId }: PostDetailProps) {
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <span className="font-medium text-sm">{comment.user.username}</span>
+                        <span className="font-medium text-sm">
+                          {comment.user.username}
+                        </span>
                         <span className="text-xs text-gray-500 ml-2">
                           {comment.user.karma} reputation
                         </span>
                       </div>
                     </div>
-                    
+
                     {comment.created_at && (
                       <span className="text-xs text-gray-500">
                         {formatDistanceToNow(new Date(comment.created_at))} ago

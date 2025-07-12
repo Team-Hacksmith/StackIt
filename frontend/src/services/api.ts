@@ -16,6 +16,19 @@ import {
   UpdateTagRequest,
 } from "@/types/api";
 
+export const uploadAPI = {
+  uploadFile: async (file: File) => {
+    console.log(file);
+    const formData = new FormData();
+    formData.append("file", file);
+    return apiClient.post<{ url: string }>("/upload", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
+};
+
 export const authAPI = {
   register: (data: RegisterRequest) => apiClient.post("/register", data),
 

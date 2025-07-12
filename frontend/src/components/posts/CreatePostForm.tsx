@@ -24,6 +24,9 @@ import { RichTextEditor } from "@/components/editor/RichTextEditor";
 const postSchema = z.object({
   title: z.string().min(10, "Title must be at least 10 characters"),
   body: z.string().min(20, "Body must be at least 20 characters"),
+  tags: z
+    .array(z.object({ id: z.number(), title: z.string() }))
+    .min(1, "At least one tag is required"),
 });
 
 type PostFormData = z.infer<typeof postSchema>;
@@ -46,9 +49,15 @@ export function CreatePostForm() {
 
   const onSubmit = async (data: PostFormData) => {
     try {
+      if (selectedTags.length === 0) {
+        form.setError("tags", { message: "At least one tag is required" });
+        return;
+      }
+
       const tagIds = selectedTags.map((tag) => tag.id);
       const result = await createPost.mutateAsync({
-        ...data,
+        title: data.title,
+        body: data.body,
         tag_ids: tagIds,
       });
       router.push(`/posts/${result.data.id}`);
@@ -122,6 +131,11 @@ export function CreatePostForm() {
               );
             })}
           </div>
+          {form.formState.errors.tags && (
+            <p className="text-sm font-medium text-destructive">
+              {form.formState.errors.tags.message}
+            </p>
+          )}
         </div>
 
         <Button type="submit" disabled={createPost.isPending}>

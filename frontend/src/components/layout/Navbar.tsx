@@ -1,32 +1,41 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu';
-import { Badge } from '@/components/ui/badge';
-import { useMe } from '@/hooks/useMe';
-import { useLogout } from '@/hooks/useAuth';
-import { useNotifications } from '@/hooks/useNotifications';
-import { Bell, Plus, User, LogOut } from 'lucide-react';
+} from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
+import { useMe } from "@/hooks/useMe";
+import { useLogout } from "@/hooks/useAuth";
+import {
+  useNotifications,
+  useMarkAllNotificationsAsRead,
+} from "@/hooks/useNotifications";
+import { Bell, Plus, User, LogOut, Check } from "lucide-react";
 
 export function Navbar() {
   const router = useRouter();
   const { data: user } = useMe();
   const { data: notifications } = useNotifications();
+  const markAllAsRead = useMarkAllNotificationsAsRead();
   const logout = useLogout();
 
-  const unreadCount = notifications?.data?.filter(n => !n.is_read).length || 0;
+  const unreadCount =
+    notifications?.data?.filter((n) => !n.is_read).length || 0;
 
   const handleLogout = () => {
     logout.mutate();
+  };
+
+  const handleMarkAllAsRead = () => {
+    markAllAsRead.mutate();
   };
 
   return (
@@ -37,7 +46,7 @@ export function Navbar() {
             <Link href="/" className="text-xl font-bold text-gray-900">
               StackIt
             </Link>
-            
+
             <div className="hidden md:flex items-center space-x-4">
               <Link href="/" className="text-gray-700 hover:text-gray-900">
                 Questions
@@ -74,22 +83,58 @@ export function Navbar() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-80">
                     <div className="p-2">
-                      <h3 className="font-semibold">Notifications</h3>
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="font-semibold">Notifications</h3>
+                        {unreadCount > 0 && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 text-xs"
+                            onClick={handleMarkAllAsRead}
+                            disabled={markAllAsRead.isPending}
+                          >
+                            <Check className="w-3 h-3 mr-1" />
+                            Mark all as read
+                          </Button>
+                        )}
+                      </div>
                       {notifications?.data?.length === 0 ? (
-                        <p className="text-sm text-gray-500 mt-2">No notifications</p>
+                        <p className="text-sm text-gray-500 mt-2">
+                          No notifications
+                        </p>
                       ) : (
-                        <div className="space-y-2 mt-2">
-                          {notifications?.data?.slice(0, 5).map((notification) => (
-                            <div
-                              key={notification.id}
-                              className={`p-2 rounded text-sm ${
-                                notification.is_read ? 'text-gray-600' : 'text-gray-900 bg-blue-50'
-                              }`}
-                            >
-                              {notification.msg}
+                        <>
+                          <div className="space-y-2 mt-2">
+                            {notifications?.data
+                              ?.slice(0, 5)
+                              .map((notification) => (
+                                <div
+                                  key={notification.id}
+                                  className={`p-2 rounded text-sm ${
+                                    notification.is_read
+                                      ? "text-gray-600"
+                                      : "text-gray-900 bg-blue-50"
+                                  }`}
+                                >
+                                  {notification.message}
+                                </div>
+                              ))}
+                          </div>
+                          {(notifications?.data?.length || 0) > 5 && (
+                            <div className="mt-2 pt-2 border-t">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="w-full text-sm"
+                                asChild
+                              >
+                                <Link href="/notifications">
+                                  View all notifications
+                                </Link>
+                              </Button>
                             </div>
-                          ))}
-                        </div>
+                          )}
+                        </>
                       )}
                     </div>
                   </DropdownMenuContent>
@@ -97,15 +142,20 @@ export function Navbar() {
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="flex items-center space-x-2">
+                    <Button
+                      variant="ghost"
+                      className="flex items-center space-x-2"
+                    >
                       <Avatar className="w-8 h-8">
                         <AvatarFallback>
                           {user.data.name.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="hidden md:block">{user.data.username}</span>
+                      <span className="hidden md:block">
+                        {user.data.username}
+                      </span>
                       <Badge variant="secondary" className="hidden md:block">
-                        {user.data.karma}
+                        {user.data.karma || 0}
                       </Badge>
                     </Button>
                   </DropdownMenuTrigger>

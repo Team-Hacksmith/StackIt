@@ -274,8 +274,10 @@ export function RichTextEditor({
       }),
     ],
     content,
+
     onUpdate: ({ editor }) => {
       onChange?.(editor.getHTML());
+      console.log("SDLFKJ");
     },
     editorProps: {
       attributes: {

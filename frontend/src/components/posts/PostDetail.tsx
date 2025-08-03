@@ -89,7 +89,7 @@ export function PostDetail({ postId }: PostDetailProps) {
       });
       setCommentContent(""); // Clear the content after successful submission
     } catch (error) {
-      console.error("Failed to create comment:", error);
+      toast.error("Failed to create comment");
     }
   };
 
@@ -97,7 +97,7 @@ export function PostDetail({ postId }: PostDetailProps) {
     try {
       await acceptComment.mutateAsync(commentId);
     } catch (error) {
-      console.error("Failed to accept comment:", error);
+      toast.error("Failed to accept comment");
     }
   };
 
@@ -161,7 +161,7 @@ export function PostDetail({ postId }: PostDetailProps) {
           </div>
 
           <div className="prose dark:prose-invert max-w-none">
-            {parse(DOMPurify.sanitize(postData.body), {
+            {/* {parse(DOMPurify.sanitize(postData.body), {
               htmlparser2: {
                 lowerCaseTags: true,
                 lowerCaseAttributeNames: true,
@@ -178,7 +178,8 @@ export function PostDetail({ postId }: PostDetailProps) {
                   return;
                 }
               },
-            } as HTMLReactParserOptions)}
+            } as HTMLReactParserOptions)} */}
+            {parse(postData.body)}
           </div>
 
           {postData.tags && postData.tags.length > 0 && (
@@ -208,7 +209,7 @@ export function PostDetail({ postId }: PostDetailProps) {
               />
               <Button
                 onClick={handleSubmitComment}
-                disabled={createComment.isPending || !commentContent.trim()}
+                disabled={createComment.isPending}
               >
                 {createComment.isPending ? "Posting..." : "Post Your Answer"}
               </Button>
@@ -314,7 +315,8 @@ export function PostDetail({ postId }: PostDetailProps) {
                       </div>
                     )}
                     <div className="prose dark:prose-invert max-w-none">
-                      {parse(DOMPurify.sanitize(comment.body), {
+                      {parse(comment.body)}
+                      {/* {parse(DOMPurify.sanitize(comment.body), {
                         htmlparser2: {
                           lowerCaseTags: true,
                           lowerCaseAttributeNames: true,
@@ -330,7 +332,7 @@ export function PostDetail({ postId }: PostDetailProps) {
                             return;
                           }
                         },
-                      } as HTMLReactParserOptions)}
+                      } as HTMLReactParserOptions)} */}
                     </div>
                   </div>
                 </div>

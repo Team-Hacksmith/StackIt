@@ -6,9 +6,10 @@ import { redirect } from "next/navigation";
 
 export default function NewPostPage() {
   const { data: user, isLoading } = useMe();
+  console.log(user, isLoading);
 
   if (!isLoading && !user) {
-    redirect("/");
+    redirect("/auth/login");
   }
   return (
     <div className="min-h-screen bg-gray-50 max-w-screen-lg mx-auto">

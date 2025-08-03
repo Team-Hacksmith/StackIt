@@ -1,4 +1,5 @@
-import axios from "axios";
+import axios, { isAxiosError } from "axios";
+import { toast } from "sonner";
 
 const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000",
@@ -24,7 +25,14 @@ apiClient.interceptors.response.use(
     //     localStorage.removeItem("auth_token");
     //     window.location.href = "/auth/login";
     //   }
+    if (isAxiosError(error)) {
+      if (error.response?.data.detail) {
+        toast(error.response?.data.detail);
+      }
+    }
     return Promise.reject(error);
+
+    // return Promise.reject(error);
   }
 );
 

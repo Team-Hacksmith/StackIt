@@ -70,9 +70,9 @@ export function PostsList() {
                     {post.title}
                   </h3>
                 </Link>
-                <div className="text-gray-600 mt-1 line-clamp-2 prose-sm">
-                  {parse(post.body)}
-                </div>
+                {/* <div className="text-gray-600 mt-1 line-clamp-2 prose-sm">
+                  {parse(post.body)[0]}
+                </div> */}
               </div>
             </div>
           </CardHeader>

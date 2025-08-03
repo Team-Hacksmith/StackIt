@@ -94,7 +94,7 @@ export function TagsList() {
     );
   }
 
-  if (!tags?.data?.length) {
+  if (!tags?.data?.length && user?.data.role !== "admin") {
     return (
       <div className="text-center py-8">
         <p className="text-gray-500">No tags available yet.</p>
@@ -133,7 +133,7 @@ export function TagsList() {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {tags.data.map((tag) => (
+        {tags?.data.map((tag) => (
           <Card key={tag.id} className="hover:shadow-md transition-shadow">
             <CardContent className="p-4 space-y-2">
               <Link href={`/?tag=${tag.title}`}>

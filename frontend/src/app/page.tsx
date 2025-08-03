@@ -1,8 +1,10 @@
+"use client";
 import { Navbar } from "@/components/layout/Navbar";
 import { PostsList } from "@/components/posts/PostsList";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Plus } from "lucide-react";
+import { useWebSocket } from "@/hooks/useWebSocket";
 
 export default function HomePage() {
   return (

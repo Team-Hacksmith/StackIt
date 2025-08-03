@@ -55,7 +55,7 @@ export function PostsList() {
     <div className="space-y-4">
       {posts.data.map((post) => (
         <Card key={post.id} className="hover:shadow-md transition-shadow">
-          <CardHeader className="pb-3">
+          <CardHeader className="">
             {post.user && (
               <div className="flex items-center space-x-2">
                 <span className="text-sm text-gray-700">
@@ -79,26 +79,27 @@ export function PostsList() {
 
           <CardContent className="pt-0">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4 text-sm text-gray-500">
-                <div className="flex items-center space-x-1">
+              {/* <div className="flex items-center space-x-4 text-sm text-gray-500"> */}
+              {/* <div className="flex items-center space-x-1">
                   <MessageCircle className="w-4 h-4" />
                   <span>{post.comments?.length || 0} answers</span>
-                </div>
+                </div> */}
 
-                <div className="flex items-center space-x-1">
+              {/* <div className="flex items-center space-x-1">
                   <ThumbsUp className="w-4 h-4" />
                   <span>0 votes</span>
-                </div>
+                </div> */}
 
-                {post.created_at && (
+              {/* {post.created_at && (
                   <div className="flex items-center space-x-1">
                     <Clock className="w-4 h-4" />
                     <span>
                       {formatDistanceToNow(new Date(post.created_at))} ago
                     </span>
                   </div>
-                )}
-              </div>
+                )} */}
+              {/* </div> */}
+              <div></div>
 
               <div className="flex items-center space-x-3">
                 {post.tags && post.tags.length > 0 && (

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 interface NotificationMessage {
   msg: string;
@@ -12,9 +12,27 @@ export function useWebSocket() {
   const wsRef = useRef<WebSocket | null>(null);
   const queryClient = useQueryClient();
 
+  const { data: meData } = useQuery({
+    queryFn: () => {},
+    queryKey: ["me"],
+    enabled: false,
+    retry: false,
+  });
+
   useEffect(() => {
     const token = localStorage.getItem("auth_token");
-    if (!token) return;
+
+    if (!token || !meData) {
+      if (wsRef.current) {
+        wsRef.current.close(1000, "No auth token or user data");
+        wsRef.current = null;
+      }
+      return;
+    }
+
+    if (wsRef.current?.readyState === WebSocket.OPEN) {
+      return;
+    }
 
     const wsUrl = `${
       process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000"
@@ -32,16 +50,13 @@ export function useWebSocket() {
         const data: NotificationMessage = JSON.parse(event.data);
         console.log("Received notification:", data);
 
-        // Update notifications cache immediately
         queryClient.setQueryData<{ unread_count: number }>(
           ["notifications", "unread"],
           (old) => ({ unread_count: data.unread_count })
         );
 
-        // Also invalidate to ensure full sync
         queryClient.invalidateQueries({ queryKey: ["notifications"] });
 
-        // Show browser notification if permission granted
         if (Notification.permission === "granted") {
           new Notification("StackIt", {
             body: data.msg,
@@ -56,12 +71,11 @@ export function useWebSocket() {
     ws.onclose = (event) => {
       console.log("WebSocket disconnected:", event.code, event.reason);
 
-      // Reconnect after a delay if not manually closed
       if (event.code !== 1000) {
         setTimeout(() => {
           if (!wsRef.current || wsRef.current.readyState === WebSocket.CLOSED) {
             const token = localStorage.getItem("auth_token");
-            if (token) {
+            if (token && meData) {
               const wsUrl = `${
                 process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000"
               }/notifications/ws?token=${token}`;
@@ -83,7 +97,7 @@ export function useWebSocket() {
         wsRef.current = null;
       }
     };
-  }, [queryClient]);
+  }, [queryClient, meData]);
 
   // Request notification permission on mount
   useEffect(() => {

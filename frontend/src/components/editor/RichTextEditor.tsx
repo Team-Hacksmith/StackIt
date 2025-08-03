@@ -63,7 +63,6 @@ function EmojiPicker({ editor }: { editor: Editor }) {
   const emojis = gitHubEmojis.filter((emoji) => emoji.emoji);
 
   const onEmojiSelect = (emoji: { emoji: string; name: string }) => {
-    const pos = editor.state.selection.from;
     editor.chain().insertContent(emoji.emoji).run();
   };
 
@@ -104,7 +103,8 @@ function ImageUploader({ editor }: { editor: Editor }) {
           : `${baseURL}${data.url}`;
         editor.chain().focus().setImage({ src: imageUrl }).run();
       }
-    } catch (error) {
+    } catch (e) {
+      console.log(e);
       toast.error("Failed to upload image");
     }
   };

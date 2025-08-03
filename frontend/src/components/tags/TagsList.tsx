@@ -43,6 +43,7 @@ export function TagsList() {
       setNewTagTitle("");
       setIsCreateOpen(false);
     } catch (error) {
+      console.log(error);
       toast.error("Failed to create tag");
     }
   };
@@ -58,6 +59,7 @@ export function TagsList() {
       setEditingTag(null);
       setIsEditOpen(false);
     } catch (error) {
+      console.log(error);
       toast.error("Failed to update tag");
     }
   };
@@ -67,6 +69,7 @@ export function TagsList() {
       await deleteTag.mutateAsync(id);
       toast.success("Tag deleted successfully");
     } catch (error) {
+      console.log(error);
       toast.error("Failed to delete tag");
     }
   };

@@ -1,41 +1,35 @@
 "use client";
 
-import { usePost } from "@/hooks/usePosts";
-import {
-  useComments,
-  useCreateComment,
-  useAcceptComment,
-  useVoteComment,
-} from "@/hooks/useComments";
-import { useMe } from "@/hooks/useMe";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { RichTextEditor } from "@/components/editor/RichTextEditor";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {
-  MessageCircle,
-  ThumbsUp,
-  Check,
-  Clock,
-  ArrowBigUp,
-  ArrowBigDown,
-} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { toast } from "sonner";
+import {
+  useAcceptComment,
+  useComments,
+  useCreateComment,
+  useVoteComment,
+} from "@/hooks/useComments";
+import { useMe } from "@/hooks/useMe";
+import { usePost } from "@/hooks/usePosts";
 import { formatDistanceToNow } from "date-fns";
-import parse, {
-  attributesToProps,
-  HTMLReactParserOptions,
-  Element,
-} from "html-react-parser";
-import DOMPurify from "dompurify";
-import { RichTextEditor } from "@/components/editor/RichTextEditor";
+import parse from "html-react-parser";
+import {
+  ArrowBigDown,
+  ArrowBigUp,
+  Check,
+  Clock,
+  MessageCircle,
+  ThumbsUp,
+} from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 interface PostDetailProps {
   postId: number;
@@ -75,6 +69,7 @@ export function PostDetail({ postId }: PostDetailProps) {
     try {
       await voteComment.mutateAsync({ commentId, voteType });
     } catch (error) {
+      console.log(error);
       toast.error("Failed to vote");
     }
   };
@@ -89,6 +84,7 @@ export function PostDetail({ postId }: PostDetailProps) {
       });
       setCommentContent(""); // Clear the content after successful submission
     } catch (error) {
+      console.log(error);
       toast.error("Failed to create comment");
     }
   };
@@ -97,6 +93,7 @@ export function PostDetail({ postId }: PostDetailProps) {
     try {
       await acceptComment.mutateAsync(commentId);
     } catch (error) {
+      console.log(error);
       toast.error("Failed to accept comment");
     }
   };

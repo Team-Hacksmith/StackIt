@@ -52,7 +52,7 @@ export function useWebSocket() {
 
         queryClient.setQueryData<{ unread_count: number }>(
           ["notifications", "unread"],
-          (old) => ({ unread_count: data.unread_count })
+          () => ({ unread_count: data.unread_count })
         );
 
         queryClient.invalidateQueries({ queryKey: ["notifications"] });

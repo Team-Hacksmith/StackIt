@@ -1,13 +1,9 @@
 "use client";
 
-import Link from "next/link";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { usePosts } from "@/hooks/usePosts";
-import { MessageCircle, ThumbsUp, Clock } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
-import parse from "html-react-parser";
+import Link from "next/link";
 
 export function PostsList() {
   const { data: posts, isLoading, error } = usePosts();

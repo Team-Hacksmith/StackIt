@@ -1,27 +1,25 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
   DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
-import { useMe } from "@/hooks/useMe";
 import { useLogout } from "@/hooks/useAuth";
+import { useMe } from "@/hooks/useMe";
 import {
-  useNotifications,
   useMarkAllNotificationsAsRead,
+  useNotifications,
 } from "@/hooks/useNotifications";
-import { Bell, Plus, User, LogOut, Check } from "lucide-react";
+import { Bell, Check, LogOut, Plus, User } from "lucide-react";
+import Link from "next/link";
 
 export function Navbar() {
-  const router = useRouter();
   const { data: user } = useMe();
   const { data: notifications } = useNotifications();
   const markAllAsRead = useMarkAllNotificationsAsRead();

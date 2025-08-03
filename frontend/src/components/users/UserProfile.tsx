@@ -5,7 +5,7 @@ import { usersAPI } from "@/services/api";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { User, Mail, Calendar } from "lucide-react";
+import { User, Mail } from "lucide-react";
 
 interface UserProfileProps {
   userId: number;
@@ -90,7 +90,7 @@ export function UserProfile({ userId }: UserProfileProps) {
         </CardHeader>
         <CardContent>
           <p className="text-gray-600">
-            This user's recent activity will be displayed here.
+            This user&apos;s recent activity will be displayed here.
           </p>
         </CardContent>
       </Card>

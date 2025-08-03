@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { authAPI } from "@/services/api";
 import { LoginRequest, RegisterRequest } from "@/types/api";
 import { useRouter } from "next/navigation";
@@ -10,7 +10,7 @@ export const useRegister = () => {
     onSuccess: () => {
       toast.success("Registration successful");
     },
-    onError: (error: any) => {
+    onError: (error) => {
       console.log(error);
       toast.error("Registration failed");
     },
@@ -30,9 +30,9 @@ export const useLogin = () => {
       queryClient.setQueryData(["me"], response.data.user);
       router.replace("/");
     },
-    onError: (error: any) => {
+    onError: (error) => {
       toast.error("Login failed");
-      // console.log(error);
+      console.log(error);
     },
   });
 };

@@ -5,7 +5,6 @@ services:
     buildCommand: cd backend && pip install uv && uv pip install -r pyproject.toml
     startCommand: cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT
     plan: starter
-    healthCheckPath: /
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -37,5 +36,4 @@ services:
 databases:
   - name: stackit-postgres
     databaseName: stackit
-    user: postgres
     plan: starter

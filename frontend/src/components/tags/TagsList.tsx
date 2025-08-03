@@ -135,7 +135,7 @@ export function TagsList() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {tags?.data.map((tag) => (
           <Card key={tag.id} className="hover:shadow-md transition-shadow">
-            <CardContent className="p-4 space-y-2">
+            <CardContent className="space-y-2">
               <Link href={`/?tag=${tag.title}`}>
                 <Badge variant="secondary" className="mb-2 text-sm">
                   {tag.title}
